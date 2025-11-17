@@ -3,15 +3,10 @@
 #include <Arduino.h>
 #include "status_led.h"
 
-#define LED_GPIO_1 19
-#define LED_GPIO_2 20
-#define LED_ON 1
-#define LED_OFF 0
-
 class StatusLed
 {
     public:
-        StatusLed();
+        StatusLed(uint8_t led_pin1 = 19,uint8_t led_pin2 = 20);
         ~StatusLed() = default;
 
         enum LedStatusEnum
@@ -23,13 +18,13 @@ class StatusLed
         void Begin();
  
     private:
-        static void Task(void *);
+        static void SetStatusTask(void *);
 
         void LedStatus();
 
-        void LedOn();
+        void LedOn(uint8_t led_pin);
 
-        void LedOff();
+        void LedOff(uint8_t led_pin);
 
         void SetLedStatus(LedStatusEnum status);
 
@@ -38,6 +33,7 @@ class StatusLed
     public:
 
     private:
+        uint8_t _led_pin[2];
         LedStatusEnum _led_status = STATUS_NORMAL;
         
 };

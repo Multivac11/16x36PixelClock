@@ -4,9 +4,9 @@ constexpr uint32_t SCAN_MS = 20;
 
 StatusKey::StatusKey(uint8_t p1, uint8_t p2, uint8_t p3, uint32_t lm): _longMs(lm), _queue(nullptr)
 {
-    _key_pin[0] = p1;
+    _key_pin[0] = p3;
     _key_pin[1] = p2;
-    _key_pin[2] = p3;
+    _key_pin[2] = p1;
 }
 
 void StatusKey::Begin()
@@ -17,10 +17,10 @@ void StatusKey::Begin()
      } 
      
     _queue = xQueueCreate(1, sizeof(Event));
-    xTaskCreatePinnedToCore(Task, "GetKeyStatus", 2048, this, 2, nullptr, 1);
+    xTaskCreatePinnedToCore(GetKeyTask, "GetKeyTask", 2048, this, 2, nullptr, 1);
 }
 
-void StatusKey::Task(void *pvParameters)
+void StatusKey::GetKeyTask(void *pvParameters)
 {
     static_cast<StatusKey*>(pvParameters)->KeyStatus();
 }

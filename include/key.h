@@ -6,7 +6,7 @@
 class StatusKey
 {
     public:
-        StatusKey(uint8_t pin1=41, uint8_t pin2=40, uint8_t pin3=39,uint32_t longMs = 800);
+        StatusKey(uint8_t key_pin1=41, uint8_t key_pin2=40, uint8_t key_pin3=39,uint32_t longMs = 800);
         ~StatusKey() = default;
 
         enum KeyStatusEnum
@@ -27,7 +27,7 @@ class StatusKey
         Event Read();          // 取出事件
 
     private:
-        static void Task(void *); // 静态入口
+        static void GetKeyTask(void *); // 静态入口
         void ScanKeys();
         void KeyStatus();
 
