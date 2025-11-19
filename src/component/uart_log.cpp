@@ -1,15 +1,16 @@
 #include "uart_log.h"
 
-UartLog::UartLog(uint32_t baudrate, SerialModuleEnum module,StatusKey* k)
+UartLog::UartLog(uint32_t baudrate, SerialModuleEnum module,StatusKey* k,Sht40* sht40)
 {
     Serial.begin(baudrate);
     _serial_modlue = module;
     _key = k;
+    _sht40 = sht40;
 }
 
 void UartLog::Begin()
 {
-    xTaskCreatePinnedToCore(SerialTask, "SerialTask", 2048, this, 1, nullptr, 1);
+    xTaskCreatePinnedToCore(SerialTask, "SerialTask", 4096, this, 1, nullptr, 1);
 }
 
 void UartLog::SerialTask(void *pvParameters)
@@ -35,11 +36,15 @@ void UartLog::PrintSerial(SerialModuleEnum module)
     {
         PrintKeyStatus();
     }
+    else if(module == SERIAL_ENV)
+    {
+        PrintEnvParams();
+    }
 }
 
 void UartLog::HelloWorld()
 {
-    Serial.println("Hello World!\n");
+    Serial.printf("Hello World!\n");
     vTaskDelay(pdMS_TO_TICKS(500));
 }
 
@@ -55,6 +60,17 @@ void UartLog::PrintKeyStatus()
         {
             Serial.printf("Key3:%d\n", s);
         }
+    }
+    vTaskDelay(pdMS_TO_TICKS(10));
+}
+
+void UartLog::PrintEnvParams()
+{
+    if(_sht40->Available())
+    {
+        auto ev = _sht40->ReadEnvParams();
+        Serial.printf("Temperature: %f C\n", ev.temperature.temperature);
+        Serial.printf("Humidity: %f %%\n", ev.humidity.relative_humidity);
     }
     vTaskDelay(pdMS_TO_TICKS(10));
 }

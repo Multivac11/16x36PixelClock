@@ -30,8 +30,6 @@ class StatusLed
 
         void LedNormal();
 
-    public:
-
     private:
         uint8_t _led_pin[2];
         LedStatusEnum _led_status = STATUS_NORMAL;
