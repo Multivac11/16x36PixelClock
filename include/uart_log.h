@@ -19,7 +19,7 @@ class UartLog
         UartLog(uint32_t baudrate, SerialModuleEnum serial_module,StatusKey* k,Sht40* sht40);
         ~UartLog() = default;
 
-        void Begin();          // 启动任务
+        void InitUartLog();          // 启动任务
 
     private:
         static void SerialTask(void *); // 静态入口

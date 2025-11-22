@@ -9,7 +9,7 @@ StatusKey::StatusKey(uint8_t p1, uint8_t p2, uint8_t p3, uint32_t lm): _longMs(l
     _key_pin[2] = p1;
 }
 
-void StatusKey::Begin()
+void StatusKey::InitKeys()
 {
      for (int i = 0; i < 3; ++i)
      {

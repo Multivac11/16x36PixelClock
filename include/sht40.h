@@ -10,7 +10,7 @@
 class Sht40
 {
     public:
-        Sht40();
+        Sht40() = default;
         ~Sht40() = default;
 
         struct EnvParamsStruct
@@ -19,7 +19,7 @@ class Sht40
             sensors_event_t humidity;
         };
 
-        void Begin();
+        void InitSht40();
         bool Available();
         EnvParamsStruct ReadEnvParams();
     private:

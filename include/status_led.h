@@ -15,7 +15,7 @@ class StatusLed
             STATUS_ERROR = 1,
         };
 
-        void Begin();
+        void InitStatusLed();
  
     private:
         static void SetStatusTask(void *);

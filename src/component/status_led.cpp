@@ -12,7 +12,7 @@ StatusLed::StatusLed(uint8_t led_gpio1, uint8_t led_gpio2)
     }
 }
 
-void StatusLed::Begin()
+void StatusLed::InitStatusLed()
 {
     xTaskCreatePinnedToCore(SetStatusTask, "SetStatusTask", 2048, this, 1, nullptr, 1);
 }

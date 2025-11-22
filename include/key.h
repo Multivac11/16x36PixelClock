@@ -22,7 +22,7 @@ class StatusKey
             KeyStatusEnum key[3];
         };
 
-        void Begin();          // 启动任务
+        void InitKeys();          // 启动任务
         bool Available(); // 是否有新事件
         Event Read();          // 取出事件
 

@@ -8,7 +8,7 @@ UartLog::UartLog(uint32_t baudrate, SerialModuleEnum module,StatusKey* k,Sht40* 
     _sht40 = sht40;
 }
 
-void UartLog::Begin()
+void UartLog::InitUartLog()
 {
     xTaskCreatePinnedToCore(SerialTask, "SerialTask", 4096, this, 1, nullptr, 1);
 }
