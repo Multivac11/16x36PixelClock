@@ -9,7 +9,7 @@ Sht40 sht40;
 AudioCapture audio_capture;
 StatusLed led(19, 20);
 StatusKey keys(39, 40, 41);
-UartLog uart(115200, UartLog::SERIAL_ENV, &keys, &sht40);
+UartLog uart(115200, UartLog::SERIAL_KEY, &keys, &sht40);
 
 void setup() 
 {

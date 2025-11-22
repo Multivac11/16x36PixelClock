@@ -24,9 +24,13 @@ class AudioCapture
         static void AudioCaptureTask(void *);
         void I2sInstall();
         void I2sSetPin();
+        void GetAudios();
 
     private:
         QueueHandle_t _queue;
         i2s_config_t _i2s_config;
         i2s_pin_config_t _pin_config;
+        uint32_t _buffer[bufferLen];
+        size_t _bytesIn = 0;
+        esp_err_t _result;
 };
