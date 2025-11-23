@@ -6,6 +6,12 @@
 class StatusKey
 {
     public:
+        static StatusKey& GetInstance()
+        {
+            static StatusKey instance;
+            return instance;
+        }
+
         StatusKey(uint8_t key_pin1=41, uint8_t key_pin2=40, uint8_t key_pin3=39,uint32_t longMs = 800);
         ~StatusKey() = default;
 

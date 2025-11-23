@@ -16,7 +16,8 @@ class UartLog
             SERIAL_ENV = 3,
         };
 
-        UartLog(uint32_t baudrate, SerialModuleEnum serial_module,StatusKey* k,Sht40* sht40);
+        UartLog(uint32_t baudrate, SerialModuleEnum serial_module);
+        
         ~UartLog() = default;
 
         void InitUartLog();          // 启动任务
@@ -30,7 +31,5 @@ class UartLog
         void PrintEnvParams();
 
     private:
-        StatusKey* _key;
-        Sht40* _sht40;
         SerialModuleEnum _serial_modlue;
 };

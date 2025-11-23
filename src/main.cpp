@@ -4,23 +4,21 @@
 #include "uart_log.h"
 #include "sht40.h"
 #include "audio_capture.h"
+#include "network.h"
 
-Sht40 sht40;
-AudioCapture audio_capture;
-StatusLed led(19, 20);
-StatusKey keys(39, 40, 41);
-UartLog uart(115200, UartLog::SERIAL_KEY, &keys, &sht40);
+UartLog uart(115200, UartLog::SERIAL_KEY);
 
 void setup() 
 {
-  led.InitStatusLed();
-  keys.InitKeys();
-  sht40.InitSht40();
-  audio_capture.InitAudioCapture();
+  NetWork::GetInstance().InitNetWork();
+  StatusLed::GetInstance().InitStatusLed();
+  StatusKey::GetInstance().InitKeys();
+  Sht40::GetInstance().InitSht40();
+  AudioCapture::GetInstance().InitAudioCapture();
   uart.InitUartLog();
 }
 
-void loop() 
+void loop()
 {
 
 }

@@ -46,7 +46,10 @@
         "stdexcept": "cpp",
         "system_error": "cpp",
         "optional": "cpp",
-        "memory_resource": "cpp"
+        "memory_resource": "cpp",
+        "atomic": "cpp",
+        "cstdint": "cpp",
+        "cinttypes": "cpp"
     },
     "trae.tab.enableRename": false,
     "trae.tab.enableAutoImport": false

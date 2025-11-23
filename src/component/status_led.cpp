@@ -14,41 +14,124 @@ StatusLed::StatusLed(uint8_t led_gpio1, uint8_t led_gpio2)
 
 void StatusLed::InitStatusLed()
 {
-    xTaskCreatePinnedToCore(SetStatusTask, "SetStatusTask", 2048, this, 1, nullptr, 1);
+    xTaskCreatePinnedToCore(GetStatusTask, "GetStatusTask", 2048, this, 1, nullptr, 1);
+    xTaskCreatePinnedToCore(SetNetworkStatusTask, "SetStatusTask", 2048, this, 1, nullptr, 1);
+    xTaskCreatePinnedToCore(SetSystemStatusTask, "SetSystemStatusTask", 2048, this, 1, nullptr, 1);
 }
 
-void StatusLed::SetStatusTask(void *pvParameters)
+void StatusLed::SetNetworkStatusTask(void *pvParameters)
 {
-    static_cast<StatusLed*>(pvParameters)->LedStatus();
+    static_cast<StatusLed*>(pvParameters)->NetworkLedStatus();
 }
 
-void StatusLed::LedStatus()
+void StatusLed::SetSystemStatusTask(void *pvParameters)
+{
+    static_cast<StatusLed*>(pvParameters)->SystemLedStatus();
+}
+
+void StatusLed::GetStatusTask(void *pvParameters)
+{
+    static_cast<StatusLed*>(pvParameters)->GetStatus();
+}
+
+void StatusLed::SystemLedStatus()
+{
+    while(true)
+    {
+        if (_system_led_status == STATUS_SYSTEM_NORMAL)
+        {
+            SystemNormal();
+        }
+        else if (_system_led_status == STATUS_SYSTEM_ERROR)
+        {
+            SystemError();
+        }
+    }
+}
+
+void StatusLed::NetworkLedStatus()
 {   
     while(true)
     {
-        SetLedStatus(_led_status);
+        if (_network_led_status == STATUS_NETWOIRK_SCANING)
+        {
+            NetworkScanning();
+        }
+        else if (_network_led_status == STATUS_NETWOIRK_ONLINE)
+        {
+            NetworkOnline();
+        }
+        else if (_network_led_status == STATUS_NETWOIRK_OFFLINE)
+        {
+            NetworkAPmode();
+        }
     }
 }
 
-void StatusLed::SetLedStatus(LedStatusEnum status)
+void StatusLed::GetStatus()
 {
-    _led_status = status;
-    if (_led_status == STATUS_NORMAL)
+    while(true)
     {
-        LedNormal();
-    }
-    else if (_led_status == STATUS_ERROR)
-    {
-        LedOff(_led_pin[0]);
+        if(NetWork::GetInstance().Available())
+        {
+            auto net_work_info = NetWork::GetInstance().ReadNetWorkInfo();
+
+            if (net_work_info.status == WL_CONNECTED)
+            {
+                _network_led_status = STATUS_NETWOIRK_ONLINE;
+            }
+            else if ((net_work_info.status == WL_DISCONNECTED) || (net_work_info.status == WL_NO_SHIELD) && net_work_info.mode == WIFI_MODE_STA)
+            {
+                _network_led_status = STATUS_NETWOIRK_SCANING;
+            }
+            else if ((net_work_info.status == WL_DISCONNECTED) || (net_work_info.status == WL_NO_SHIELD) && net_work_info.mode == WIFI_MODE_AP)
+            {
+                _network_led_status = STATUS_NETWOIRK_OFFLINE;
+            }
+        }
+        
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
 
-void StatusLed::LedNormal()
+void StatusLed::SystemNormal()
+{
+    LedOn(_led_pin[1]);
+    vTaskDelay(pdMS_TO_TICKS(200));
+    LedOff(_led_pin[1]);
+    vTaskDelay(pdMS_TO_TICKS(200));
+}
+
+void StatusLed::SystemError()
+{
+    LedOn(_led_pin[1]);
+    vTaskDelay(pdMS_TO_TICKS(50));
+    LedOff(_led_pin[1]);
+    vTaskDelay(pdMS_TO_TICKS(50));
+}
+
+void StatusLed::NetworkScanning()
 {
     LedOn(_led_pin[0]);
-    vTaskDelay(pdMS_TO_TICKS(200));
+    vTaskDelay(pdMS_TO_TICKS(50));
     LedOff(_led_pin[0]);
-    vTaskDelay(pdMS_TO_TICKS(200));
+    vTaskDelay(pdMS_TO_TICKS(50));
+}
+
+void StatusLed::NetworkAPmode()
+{
+    LedOn(_led_pin[0]);
+    vTaskDelay(pdMS_TO_TICKS(150));
+    LedOff(_led_pin[0]);
+    vTaskDelay(pdMS_TO_TICKS(150));
+}
+
+void StatusLed::NetworkOnline()
+{
+    LedOn(_led_pin[0]);
+    vTaskDelay(pdMS_TO_TICKS(1200));
+    LedOff(_led_pin[0]);
+    vTaskDelay(pdMS_TO_TICKS(1200));
 }
 
 void StatusLed::LedOn(uint8_t led_gpio)

@@ -1,11 +1,9 @@
 #include "uart_log.h"
 
-UartLog::UartLog(uint32_t baudrate, SerialModuleEnum module,StatusKey* k,Sht40* sht40)
+UartLog::UartLog(uint32_t baudrate, SerialModuleEnum module)
 {
     Serial.begin(baudrate);
     _serial_modlue = module;
-    _key = k;
-    _sht40 = sht40;
 }
 
 void UartLog::InitUartLog()
@@ -50,12 +48,12 @@ void UartLog::HelloWorld()
 
 void UartLog::PrintKeyStatus()
 {
-    if (_key->Available())
+    if (StatusKey::GetInstance().Available())
     {
-        auto ev = _key->Read();
-        uint8_t s = ev.key[2] == StatusKey::KEY_SHORT   ? 1 :
-                        ev.key[2] == StatusKey::KEY_LONG    ? 2  :
-                        ev.key[2] == StatusKey::KEY_PRESSING? 3 : 4;
+        auto ev = StatusKey::GetInstance().Read();
+        uint8_t s = ev.key[0] == StatusKey::KEY_SHORT   ? 1 :
+                        ev.key[0] == StatusKey::KEY_LONG    ? 2  :
+                        ev.key[0] == StatusKey::KEY_PRESSING? 3 : 4;
         if (s) 
         {
             Serial.printf("Key3:%d\n", s);
@@ -66,9 +64,9 @@ void UartLog::PrintKeyStatus()
 
 void UartLog::PrintEnvParams()
 {
-    if(_sht40->Available())
+    if(Sht40::GetInstance().Available())
     {
-        auto ev = _sht40->ReadEnvParams();
+        auto ev = Sht40::GetInstance().ReadEnvParams();
         Serial.printf("Temperature: %f C\n", ev.temperature.temperature);
         Serial.printf("Humidity: %f %%\n", ev.humidity.relative_humidity);
     }

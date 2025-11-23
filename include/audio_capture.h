@@ -15,6 +15,12 @@
 class AudioCapture 
 {
     public:
+        static AudioCapture& GetInstance()
+        {
+            static AudioCapture instance;
+            return instance;
+        }
+
         AudioCapture() = default;
         ~AudioCapture() = default;
 

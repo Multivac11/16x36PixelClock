@@ -71,9 +71,8 @@ void AudioCapture::GetAudios()
                     sum += val;
                 }
                 float mean = (float)sum / samples_read;
-                Serial.println(mean);
+                // Serial.println(mean);
             }
-            // Serial.println(samples_read);
         }
         vTaskDelay(pdMS_TO_TICKS(20));
     }

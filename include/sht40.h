@@ -10,6 +10,12 @@
 class Sht40
 {
     public:
+        static Sht40& GetInstance()
+        {
+            static Sht40 instance;
+            return instance;
+        }
+
         Sht40() = default;
         ~Sht40() = default;
 
