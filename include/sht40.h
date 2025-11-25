@@ -35,7 +35,7 @@ class Sht40
         void GetEnvParams();
 
     private:
-        Adafruit_SHT4x _sht40 = Adafruit_SHT4x();
-        EnvParamsStruct _env_params;
-        QueueHandle_t _queue;
+        Adafruit_SHT4x sht40_ = Adafruit_SHT4x();
+        EnvParamsStruct env_params_;
+        QueueHandle_t queue_;
 };

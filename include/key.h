@@ -38,14 +38,14 @@ class StatusKey
         void KeyStatus();
 
     private:
-        uint8_t  _key_pin[3];
-        uint32_t _longMs;
-        QueueHandle_t _queue;
-        Event _ev;               // 缓存
+        uint8_t  key_pin_[3];
+        uint32_t longMs_;
+        QueueHandle_t queue_;
+        Event ev_;               // 缓存
         struct Buf 
         { 
             uint32_t t; 
             bool act; 
         };
-        Buf _buffer[3] = {};
+        Buf buffer_[3] = {};
 };

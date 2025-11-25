@@ -2,13 +2,13 @@
 
 StatusLed::StatusLed(uint8_t led_gpio1, uint8_t led_gpio2)
 {
-    _led_pin[0] = led_gpio1;
-    _led_pin[1] = led_gpio2;
+    led_pin_[0] = led_gpio1;
+    led_pin_[1] = led_gpio2;
 
     for(int i = 0; i < 2; i++)
     {
-        pinMode(_led_pin[i], OUTPUT);
-        digitalWrite(_led_pin[i], 0);
+        pinMode(led_pin_[i], OUTPUT);
+        digitalWrite(led_pin_[i], 0);
     }
 }
 
@@ -38,11 +38,11 @@ void StatusLed::SystemLedStatus()
 {
     while(true)
     {
-        if (_system_led_status == STATUS_SYSTEM_NORMAL)
+        if (system_led_status_ == STATUS_SYSTEM_NORMAL)
         {
             SystemNormal();
         }
-        else if (_system_led_status == STATUS_SYSTEM_ERROR)
+        else if (system_led_status_ == STATUS_SYSTEM_ERROR)
         {
             SystemError();
         }
@@ -53,15 +53,15 @@ void StatusLed::NetworkLedStatus()
 {   
     while(true)
     {
-        if (_network_led_status == STATUS_NETWOIRK_SCANING)
+        if (network_led_status_ == STATUS_NETWOIRK_SCANING)
         {
             NetworkScanning();
         }
-        else if (_network_led_status == STATUS_NETWOIRK_ONLINE)
+        else if (network_led_status_ == STATUS_NETWOIRK_ONLINE)
         {
             NetworkOnline();
         }
-        else if (_network_led_status == STATUS_NETWOIRK_OFFLINE)
+        else if (network_led_status_ == STATUS_NETWOIRK_OFFLINE)
         {
             NetworkAPmode();
         }
@@ -78,15 +78,15 @@ void StatusLed::GetStatus()
 
             if (net_work_info.status == WL_CONNECTED)
             {
-                _network_led_status = STATUS_NETWOIRK_ONLINE;
+                network_led_status_ = STATUS_NETWOIRK_ONLINE;
             }
             else if ((net_work_info.status == WL_DISCONNECTED) || (net_work_info.status == WL_NO_SHIELD) && net_work_info.mode == WIFI_MODE_STA)
             {
-                _network_led_status = STATUS_NETWOIRK_SCANING;
+                network_led_status_ = STATUS_NETWOIRK_SCANING;
             }
             else if ((net_work_info.status == WL_DISCONNECTED) || (net_work_info.status == WL_NO_SHIELD) && net_work_info.mode == WIFI_MODE_AP)
             {
-                _network_led_status = STATUS_NETWOIRK_OFFLINE;
+                network_led_status_ = STATUS_NETWOIRK_OFFLINE;
             }
         }
         
@@ -96,41 +96,41 @@ void StatusLed::GetStatus()
 
 void StatusLed::SystemNormal()
 {
-    LedOn(_led_pin[1]);
+    LedOn(led_pin_[1]);
     vTaskDelay(pdMS_TO_TICKS(200));
-    LedOff(_led_pin[1]);
+    LedOff(led_pin_[1]);
     vTaskDelay(pdMS_TO_TICKS(200));
 }
 
 void StatusLed::SystemError()
 {
-    LedOn(_led_pin[1]);
+    LedOn(led_pin_[1]);
     vTaskDelay(pdMS_TO_TICKS(50));
-    LedOff(_led_pin[1]);
+    LedOff(led_pin_[1]);
     vTaskDelay(pdMS_TO_TICKS(50));
 }
 
 void StatusLed::NetworkScanning()
 {
-    LedOn(_led_pin[0]);
+    LedOn(led_pin_[0]);
     vTaskDelay(pdMS_TO_TICKS(50));
-    LedOff(_led_pin[0]);
+    LedOff(led_pin_[0]);
     vTaskDelay(pdMS_TO_TICKS(50));
 }
 
 void StatusLed::NetworkAPmode()
 {
-    LedOn(_led_pin[0]);
+    LedOn(led_pin_[0]);
     vTaskDelay(pdMS_TO_TICKS(150));
-    LedOff(_led_pin[0]);
+    LedOff(led_pin_[0]);
     vTaskDelay(pdMS_TO_TICKS(150));
 }
 
 void StatusLed::NetworkOnline()
 {
-    LedOn(_led_pin[0]);
+    LedOn(led_pin_[0]);
     vTaskDelay(pdMS_TO_TICKS(1200));
-    LedOff(_led_pin[0]);
+    LedOff(led_pin_[0]);
     vTaskDelay(pdMS_TO_TICKS(1200));
 }
 

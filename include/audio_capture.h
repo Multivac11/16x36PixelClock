@@ -33,10 +33,10 @@ class AudioCapture
         void GetAudios();
 
     private:
-        QueueHandle_t _queue;
-        i2s_config_t _i2s_config;
-        i2s_pin_config_t _pin_config;
-        uint32_t _buffer[bufferLen];
-        size_t _bytesIn = 0;
-        esp_err_t _result;
+        QueueHandle_t queue_;
+        i2s_config_t i2s_config_;
+        i2s_pin_config_t pin_config_;
+        uint32_t buffer_[bufferLen];
+        size_t bytesIn_ = 0;
+        esp_err_t result_;
 };

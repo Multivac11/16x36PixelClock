@@ -62,8 +62,8 @@ class StatusLed
         void SystemError();
 
     private:
-        uint8_t _led_pin[2];
-        NetworkLedStatusEnum _network_led_status = STATUS_NETWOIRK_SCANING;
-        SystemLedStatusEnum _system_led_status = STATUS_SYSTEM_NORMAL;
+        uint8_t led_pin_[2];
+        NetworkLedStatusEnum network_led_status_ = STATUS_NETWOIRK_SCANING;
+        SystemLedStatusEnum system_led_status_ = STATUS_SYSTEM_NORMAL;
         
 };

@@ -3,7 +3,7 @@
 UartLog::UartLog(uint32_t baudrate, SerialModuleEnum module)
 {
     Serial.begin(baudrate);
-    _serial_modlue = module;
+    serial_modlue_ = module;
 }
 
 void UartLog::InitUartLog()
@@ -20,7 +20,7 @@ void UartLog::SerialPrint()
 {
     while(true)
     {
-        PrintSerial(_serial_modlue);
+        PrintSerial(serial_modlue_);
     }
 }
 

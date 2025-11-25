@@ -2,21 +2,21 @@
 
 constexpr uint32_t SCAN_MS = 20;
 
-StatusKey::StatusKey(uint8_t p1, uint8_t p2, uint8_t p3, uint32_t lm): _longMs(lm), _queue(nullptr)
+StatusKey::StatusKey(uint8_t p1, uint8_t p2, uint8_t p3, uint32_t lm): longMs_(lm), queue_(nullptr)
 {
-    _key_pin[0] = p3;
-    _key_pin[1] = p2;
-    _key_pin[2] = p1;
+    key_pin_[0] = p3;
+    key_pin_[1] = p2;
+    key_pin_[2] = p1;
 }
 
 void StatusKey::InitKeys()
 {
      for (int i = 0; i < 3; ++i)
      {
-        pinMode(_key_pin[i], INPUT_PULLUP);
+        pinMode(key_pin_[i], INPUT_PULLUP);
      } 
      
-    _queue = xQueueCreate(1, sizeof(Event));
+    queue_ = xQueueCreate(1, sizeof(Event));
     xTaskCreatePinnedToCore(GetKeyTask, "GetKeyTask", 2048, this, 2, nullptr, 1);
 }
 
@@ -39,28 +39,28 @@ void StatusKey::ScanKeys()
 
     for (int i = 0; i < 3; ++i) 
     {
-        bool down = digitalRead(_key_pin[i]) == LOW;
+        bool down = digitalRead(key_pin_[i]) == LOW;
 
         if (down) 
         {                            // 检测到按下
-            if (!_buffer[i].act)
+            if (!buffer_[i].act)
             {                      // 如果是刚按下
-                _buffer[i].act = true;
-                _buffer[i].t   = now;
+                buffer_[i].act = true;
+                buffer_[i].t   = now;
             }
         } 
         else 
         {                            // 检测到未按下
-            if (_buffer[i].act) 
+            if (buffer_[i].act) 
             {                        // 检测到按下刚松开
-                uint32_t dt = now - _buffer[i].t;
-                _ev.key[i] = (dt >= _longMs) ? KEY_LONG : KEY_SHORT;
-                _buffer[i].act = false;
+                uint32_t dt = now - buffer_[i].t;
+                ev_.key[i] = (dt >= longMs_) ? KEY_LONG : KEY_SHORT;
+                buffer_[i].act = false;
             } 
             else
             {
-                _ev.key[i] = KEY_NONE;
-                _buffer[i].t   = now;
+                ev_.key[i] = KEY_NONE;
+                buffer_[i].t   = now;
             }
         }
     }
@@ -68,7 +68,7 @@ void StatusKey::ScanKeys()
     bool allZero = true;            // 判断当按键发生了变化时才写入队列
     for (int i = 0; i < 3; ++i)
     {
-        if (_ev.key[i] != KEY_NONE) 
+        if (ev_.key[i] != KEY_NONE) 
         { 
             allZero = false; 
             break; 
@@ -77,7 +77,7 @@ void StatusKey::ScanKeys()
 
     if (!allZero) 
     {
-        xQueueOverwrite(_queue, &_ev);
+        xQueueOverwrite(queue_, &ev_);
     }
 
     vTaskDelay(pdMS_TO_TICKS(SCAN_MS));
@@ -85,10 +85,10 @@ void StatusKey::ScanKeys()
 
 bool StatusKey::Available()
 {
-    return xQueueReceive(_queue, &_ev, 0) == pdTRUE;
+    return xQueueReceive(queue_, &ev_, 0) == pdTRUE;
 }
 
 StatusKey::Event StatusKey::Read()
 {
-    return _ev;
+    return ev_;
 }

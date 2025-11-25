@@ -1,9 +1,9 @@
 #include "network.h"
 
-NetWork::NetWork() : _server(80)
+NetWork::NetWork() : server_(80)
 {
         // 配置页面HTML内容
-    _configPage = R"rawliteral(
+    configPage_ = R"rawliteral(
         <!DOCTYPE html>
         <html>
         <head>
@@ -21,8 +21,8 @@ NetWork::NetWork() : _server(80)
             <form action="/config" method="get">
                 <select name="ssid" required>
                     <option value="">-- 请选择WiFi --</option>)rawliteral";
-            _configPage += MakeOptionList();
-            _configPage += R"rawliteral(
+            configPage_ += MakeOptionList();
+            configPage_ += R"rawliteral(
                 </select>
                 <input type="password" name="password" placeholder="WiFi密码" required>
                 <button type="submit">连接</button>
@@ -31,7 +31,7 @@ NetWork::NetWork() : _server(80)
         </html>)rawliteral";
 
     // 连接成功页面
-    _successPage = R"rawliteral(
+    successPage_ = R"rawliteral(
         <!DOCTYPE html>
         <html>
         <head>
@@ -50,7 +50,7 @@ NetWork::NetWork() : _server(80)
     )rawliteral";
 
     // 连接失败页面
-    _failurePage = R"rawliteral(             
+    failurePage_ = R"rawliteral(             
         <!DOCTYPE html>
         <html>
         <head>
@@ -73,7 +73,7 @@ void NetWork::InitNetWork()
 {
     Serial.println("初始化网络...");
     LoadWiFiConfig();
-    _queue = xQueueCreate(1, sizeof(NetWorkInfoStruct));
+    queue_ = xQueueCreate(1, sizeof(NetWorkInfoStruct));
     xTaskCreatePinnedToCore(NetWorkTask, "NetWorkTask", 4096, this, 1, nullptr, 1);
     xTaskCreatePinnedToCore(ConnectWorkTask, "ConnectWorkTask", 4096 , this, 1, nullptr, 1);
 }
@@ -92,24 +92,24 @@ void NetWork::GetNetWorkInfo()
 {
      while (true) 
      {
-        _net_work_info.status = WiFi.status();
-        _net_work_info.mode = WiFi.getMode();
-        xQueueOverwrite(_queue, &_net_work_info);
+        net_work_info_.status = WiFi.status();
+        net_work_info_.mode = WiFi.getMode();
+        xQueueOverwrite(queue_, &net_work_info_);
         
-        if (_net_work_info.status == WL_CONNECTED)
+        if (net_work_info_.status == WL_CONNECTED)
         {
 
         } 
-        else if (_net_work_info.status == WL_DISCONNECTED) 
+        else if (net_work_info_.status == WL_DISCONNECTED) 
         {
-            if (!_scanning && !_apStarted) 
+            if (!scanning_ && !apStarted_) 
             {
                 Serial.println("Wi-Fi 断线，重新进入周期扫描...");
                 WiFi.mode(WIFI_OFF);
                 vTaskDelay(pdMS_TO_TICKS(200));
-                _scanning = true;
+                scanning_ = true;
             }
-            _server.handleClient();
+            server_.handleClient();
         }
         vTaskDelay(pdMS_TO_TICKS(100));
     }
@@ -119,7 +119,7 @@ void NetWork::StartConection()
 {
     while (true) 
     {
-        while(_scanning)
+        while(scanning_)
         {
             WiFi.mode(WIFI_STA);
             vTaskDelay(100);
@@ -128,18 +128,18 @@ void NetWork::StartConection()
             {
                 Serial.print("当前扫描到热点数量: ");
                 Serial.println(scanRes);
-                _connect_count ++;
+                connect_count_ ++;
                 bool hit = false;
                 for (int i = 0; i < scanRes; ++i)
                 {
                     String seen = WiFi.SSID(i);
-                    for (auto& r : _netList) 
+                    for (auto& r : netList_) 
                     {
                         if (seen == r.ssid) 
                         {
                             Serial.printf("发现已保存WiFi: %s，尝试连接...\n", seen.c_str());
-                            _ssid = r.ssid;
-                            _password = r.pass;
+                            ssid_ = r.ssid;
+                            password_ = r.pass;
                             ConnectToWiFi();
                             hit = true;
                             break;
@@ -156,18 +156,18 @@ void NetWork::StartConection()
                 Serial.println("扫描失败！");
             }
             
-            if (_connect_count >= 4)
+            if (connect_count_ >= 4)
             {
-                _apStarted = true;       
-                _scanning = false;
+                apStarted_ = true;       
+                scanning_ = false;
             }
             vTaskDelay(pdMS_TO_TICKS(1000));
         }
 
-        if(_apStarted && _connect_count != 0)
+        if(apStarted_ && connect_count_ != 0)
         {
             Serial.println("本次无匹配，打开配网 Web...");
-            _connect_count = 0;
+            connect_count_ = 0;
             StartAPMode();
         }
 
@@ -177,20 +177,20 @@ void NetWork::StartConection()
 
 bool NetWork::Available()
 {
-    return xQueueReceive(_queue, &_net_work_info, 0) == pdTRUE;
+    return xQueueReceive(queue_, &net_work_info_, 0) == pdTRUE;
 }
 
 NetWork::NetWorkInfoStruct NetWork::ReadNetWorkInfo()
 {
-    return _net_work_info;
+    return net_work_info_;
 }
 
 bool NetWork::LoadWiFiConfig()
 {
-    _netList.clear();
-    _prefs.begin(NS, false);
-    String json = _prefs.getString(KEY_LIST, "[]");
-    _prefs.end();
+    netList_.clear();
+    prefs_.begin(NS, false);
+    String json = prefs_.getString(KEY_LIST, "[]");
+    prefs_.end();
 
     Serial.print("从NVS读出的原始json: ");
     Serial.println(json);
@@ -200,9 +200,9 @@ bool NetWork::LoadWiFiConfig()
     JsonArray arr = doc.as<JsonArray>();
     for (JsonObject o : arr)
     {
-        _netList.push_back({o["s"], o["p"]});
+        netList_.push_back({o["s"], o["p"]});
     }
-    return !_netList.empty();
+    return !netList_.empty();
 }
 
 bool NetWork::SaveWiFiConfig()
@@ -210,7 +210,7 @@ bool NetWork::SaveWiFiConfig()
     JsonDocument doc;
     JsonArray arr = doc.to<JsonArray>();
 
-    for (auto& r : _netList)
+    for (auto& r : netList_)
     {
         JsonObject obj = arr.add<JsonObject>();
         obj["s"] = r.ssid;
@@ -219,15 +219,15 @@ bool NetWork::SaveWiFiConfig()
 
     String json;
     serializeJson(doc, json);
-    _prefs.begin(NS, false);
-    _prefs.putString(KEY_LIST, json);
-    _prefs.end();
+    prefs_.begin(NS, false);
+    prefs_.putString(KEY_LIST, json);
+    prefs_.end();
     return true;
 }
 
 void NetWork::AddWiFi(const String& ssid, const String& pass)
 {
-    for (auto& r : _netList)
+    for (auto& r : netList_)
     {
         if (r.ssid == ssid)
         { 
@@ -237,18 +237,18 @@ void NetWork::AddWiFi(const String& ssid, const String& pass)
         }
     }
     
-    if (_netList.size() >= MAX_NETS) 
+    if (netList_.size() >= MAX_NETS) 
     {
-        _netList.pop_back();
+        netList_.pop_back();
     }
-    _netList.push_back({ssid, pass});
+    netList_.push_back({ssid, pass});
     SaveWiFiConfig();
 }
 
 void NetWork::ConnectToWiFi()
 {
-    WiFi.begin(_ssid.c_str(), _password.c_str());
-    Serial.printf("连接 %s ...\n", _ssid.c_str());
+    WiFi.begin(ssid_.c_str(), password_.c_str());
+    Serial.printf("连接 %s ...\n", ssid_.c_str());
     int attempts = 0;
     while (WiFi.status() != WL_CONNECTED && attempts < 10) 
     {
@@ -259,10 +259,10 @@ void NetWork::ConnectToWiFi()
     if (WiFi.status() == WL_CONNECTED) 
     {
         Serial.println("\n连接成功！IP: " + WiFi.localIP().toString());
-        _connect_count = 0;
-        _scanning = false;
-        _apStarted = false;
-        AddWiFi(_ssid, _password);
+        connect_count_ = 0;
+        scanning_ = false;
+        apStarted_ = false;
+        AddWiFi(ssid_, password_);
 
     }
     else 
@@ -279,24 +279,24 @@ void NetWork::StartAPMode()
     Serial.print("AP IP地址: ");
     Serial.println(WiFi.softAPIP());
 
-    _server.on("/", [this]() { _server.send(200, "text/html", _configPage); });
-    _server.on("/config", [this]() 
+    server_.on("/", [this]() { server_.send(200, "text/html", configPage_); });
+    server_.on("/config", [this]() 
     {
-        if (_server.hasArg("ssid") && _server.hasArg("password")) 
+        if (server_.hasArg("ssid") && server_.hasArg("password")) 
         {
-            _ssid     = _server.arg("ssid");
-            _password = _server.arg("password");
-            Serial.printf("接收到WiFi配置 - SSID: %s, 密码: %s\n", _ssid.c_str(), _password.c_str());
-            _server.send(200, "text/html", _successPage);
+            ssid_     = server_.arg("ssid");
+            password_ = server_.arg("password");
+            Serial.printf("接收到WiFi配置 - SSID: %s, 密码: %s\n", ssid_.c_str(), password_.c_str());
+            server_.send(200, "text/html", successPage_);
             vTaskDelay(pdMS_TO_TICKS(2000));
             ConnectToWiFi();
         } 
         else 
         {
-            _server.send(400, "text/plain", "错误: 缺少参数");
+            server_.send(400, "text/plain", "错误: 缺少参数");
         }
     });
-    _server.begin();
+    server_.begin();
     Serial.println("Web服务器已启动");
 }
 

@@ -31,5 +31,5 @@ class UartLog
         void PrintEnvParams();
 
     private:
-        SerialModuleEnum _serial_modlue;
+        SerialModuleEnum serial_modlue_;
 };
