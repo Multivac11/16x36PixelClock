@@ -6,6 +6,7 @@
 #include "audio_capture.h"
 #include "network.h"
 #include "light_sensor.h"
+#include "ws_matrix.h"
 
 UartLog uart(115200, UartLog::SERIAL_KEY);
 
@@ -13,6 +14,7 @@ void setup()
 {
   NetWork::GetInstance().InitNetWork();
   LightSensor::GetInstance().InitLightSensor();
+  WsMatrix::GetInstance().InitWsMatrix();
   StatusLed::GetInstance().InitStatusLed();
   StatusKey::GetInstance().InitKeys();
   Sht40::GetInstance().InitSht40();
