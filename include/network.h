@@ -1,8 +1,9 @@
 #pragma once
 
-#include <WebServer.h>
-#include <WiFi.h>
 #include <Arduino.h>
+#include <WiFi.h>
+#include <WiFiClient.h>
+#include <WebServer.h>
 #include <EEPROM.h>
 #include <Preferences.h>
 #include <ArduinoJson.h>
