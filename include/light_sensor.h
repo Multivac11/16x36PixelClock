@@ -18,14 +18,16 @@ class LightSensor
 
         void InitLightSensor();
 
+        bool Available();
+
+        uint16_t ReadLightValue();
+
     private:
         static void LightSensorTask(void *);
 
         void GetLightValue();
 
     private:
-        uint8_t _adc_pins[1] = {1};
-        uint8_t _adc_pins_count = 1;
-        volatile bool _adc_done = false;
-        // adc_continuous_result_t *result = NULL;
+        QueueHandle_t queue_;
+        uint16_t light_value_;
 };
