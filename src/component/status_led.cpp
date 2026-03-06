@@ -2,8 +2,8 @@
 
 StatusLed::StatusLed(uint8_t led_gpio1, uint8_t led_gpio2)
 {
-    led_pin_[0] = led_gpio1;
-    led_pin_[1] = led_gpio2;
+    led_pin_[1] = led_gpio1;
+    led_pin_[0] = led_gpio2;
 
     for(int i = 0; i < 2; i++)
     {
